@@ -1,0 +1,240 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Calculator',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: CalculatorScreen(),
+    );
+  }
+}
+
+class CalculatorScreen extends StatefulWidget {
+  @override
+  _CalculatorScreenState createState() => _CalculatorScreenState();
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  String _output = "0";
+  String _history = "";
+  double num1 = 0.0;
+  double num2 = 0.0;
+  String operand = "";
+  String _prevOperand = "";
+
+  void _buttonPressed(String buttonText) {
+    setState(() {
+      if (buttonText == "C") {
+        _output = "0";
+        _history = "";
+        num1 = 0.0;
+        num2 = 0.0;
+        operand = "";
+        _prevOperand = "";
+      } else if (buttonText == "+" ||
+          buttonText == "-" ||
+          buttonText == "×" ||
+          buttonText == "÷") {
+        if (num1 == 0) {
+          num1 = double.parse(_output);
+        } else {
+          num2 = double.parse(_output);
+        }
+        _prevOperand = operand;
+        operand = buttonText;
+        _history = _history + " " + _output + " " + operand;
+        _output = "0";
+      } else if (buttonText == ".") {
+        if (!_output.contains(".")) {
+          _output = _output + buttonText;
+        }
+      } else if (buttonText == "=") {
+        if (operand.isNotEmpty) {
+          num2 = double.parse(_output);
+          _history = _history + " " + _output + " =";
+          
+          switch (operand) {
+            case "+":
+              _output = (num1 + num2).toString();
+              break;
+            case "-":
+              _output = (num1 - num2).toString();
+              break;
+            case "×":
+              _output = (num1 * num2).toString();
+              break;
+            case "÷":
+              _output = (num1 / num2).toString();
+              break;
+          }
+          
+          // Remove decimal if it's .0
+          if (_output.endsWith(".0")) {
+            _output = _output.substring(0, _output.length - 2);
+          }
+          
+          num1 = 0.0;
+          num2 = 0.0;
+          operand = "";
+        }
+      } else if (buttonText == "⌫") {
+        if (_output.length > 1) {
+          _output = _output.substring(0, _output.length - 1);
+        } else {
+          _output = "0";
+        }
+      } else {
+        if (_output == "0") {
+          _output = buttonText;
+        } else {
+          _output = _output + buttonText;
+        }
+      }
+    });
+  }
+
+  Widget _buildButton(String buttonText, {Color? color, Color? textColor}) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(6.0),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color ?? Colors.blueGrey[50],
+            foregroundColor: textColor ?? Colors.black87,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(20),
+            elevation: 2,
+          ),
+          onPressed: () => _buttonPressed(buttonText),
+          child: Text(
+            buttonText,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              flex: 1,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                alignment: Alignment.bottomRight,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: Text(
+                    _history,
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                alignment: Alignment.bottomRight,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    _output,
+                    style: TextStyle(
+                      fontSize: 64,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Divider(height: 1, thickness: 1),
+            Expanded(
+              flex: 6,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: Row(
+                        children: <Widget>[
+                          _buildButton("C", color: Colors.red[400], textColor: Colors.white),
+                          _buildButton("⌫", color: Colors.blueGrey[200]),
+                          _buildButton("÷", color: Colors.blueGrey[200]),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: <Widget>[
+                          _buildButton("7"),
+                          _buildButton("8"),
+                          _buildButton("9"),
+                          _buildButton("×", color: Colors.blueGrey[200]),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: <Widget>[
+                          _buildButton("4"),
+                          _buildButton("5"),
+                          _buildButton("6"),
+                          _buildButton("-", color: Colors.blueGrey[200]),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: <Widget>[
+                          _buildButton("1"),
+                          _buildButton("2"),
+                          _buildButton("3"),
+                          _buildButton("+", color: Colors.blueGrey[200]),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        children: <Widget>[
+                          _buildButton(".", color: Colors.blueGrey[200]),
+                          _buildButton("0"),
+                          _buildButton("00"),
+                          _buildButton("=", color: Colors.blue[600], textColor: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
